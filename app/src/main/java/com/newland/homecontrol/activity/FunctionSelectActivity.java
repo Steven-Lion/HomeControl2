@@ -104,6 +104,19 @@ public class FunctionSelectActivity extends Activity implements MyReceiver.Messa
         tvTitle.setText("远程智能家居控制系统");
         mAppAction = new AppActionImpl(this);//实例化云平台操作类
         // TODO: 接收登录页面传来的是否要登陆的信息
+        isLogin = getIntent().getBooleanExtra("isGoToLogin",false);
+        //如果为true登录云平台
+        if (isLogin){
+            String Username = sharedPreferencesUtils.getUsername();
+            String Pwd = sharedPreferencesUtils.getPassword();
+            String IP = sharedPreferencesUtils.getIp();
+            String ProjectId = sharedPreferencesUtils.getProjectID();
+            //登录云平台.
+            login(Username,Pwd,IP,ProjectId);
+            Toast.makeText(FunctionSelectActivity.this, "登录成功",
+                    Toast.LENGTH_SHORT).show();
+
+        }
         }
     //获取各房间灯的初始状态
     private void getLightState(){

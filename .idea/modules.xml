@@ -2,8 +2,10 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/HomeControl2_Init.iml" filepath="$PROJECT_DIR$/HomeControl2_Init.iml" />
+      <module fileurl="file://$PROJECT_DIR$/HomeControl2.iml" filepath="$PROJECT_DIR$/HomeControl2.iml" />
+      <module fileurl="file://G:\16khkASprojects\HomeControl2\HomeControl2_Init.iml" filepath="G:\16khkASprojects\HomeControl2\HomeControl2_Init.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://G:\16khkASprojects\HomeControl2\app\app.iml" filepath="G:\16khkASprojects\HomeControl2\app\app.iml" />
     </modules>
   </component>
 </project>

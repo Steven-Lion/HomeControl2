@@ -5,8 +5,8 @@ package com.newland.homecontrol.bean;
  */
 
 public class Global {
-    public static final int CURTAIN = 83;//窗帘执行器
-    public static final int LIGHT_LIVING = 84;//客厅电灯执行器
-    public static final int LIGHT_ROOM = 86;//卧室电灯执行器
-    public static final int LIGHT_STUDY = 85;//书房电灯执行器
+    public static final int CURTAIN = 358;//窗帘执行器
+    public static final int LIGHT_LIVING = 350;//客厅电灯执行器
+    public static final int LIGHT_ROOM = 351;//卧室电灯执行器
+    public static final int LIGHT_STUDY = 352;//书房电灯执行器
 }

@@ -87,15 +87,25 @@ public class LoginActivity extends Activity {
      * 判断是否记住登陆信息，如果记住再判断是否是其他页面跳过来要进行账号设置
      */
     private void initSharePreferences() {
+        sharedPreferencesUtils = sharedPreferencesUtils.getInstant(this);
         // TODO:判断是否记住登陆信息，
-        if (cbSaveMsg.isChecked()){
+
+        if (sharedPreferencesUtils.getIsSaveMsg()){
             //TODO:如果记住了在判断是否是其他页面跳过来是否要进行账号设置
-            ivdetail.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent intent = new Intent()
-                }
-            });
+            if (isSetAccount){
+                //TODO:如果是设置账号密码并且记住了登录信息，设置checkbox状态，填充用户名称密码等信息.
+                    cbSaveMsg.setChecked(true);
+                    edtUserName.setText(sharedPreferencesUtils.getUsername());
+                    edtPassword.setText(sharedPreferencesUtils.getPassword());
+                    edtIp.setText(sharedPreferencesUtils.getIp());
+                    edtProject.setText(sharedPreferencesUtils.getProjectID());
+            }
+            else{
+
+                //TODO:如果记住了登录信息但是不是设置用户名密码的。在功能选择界名登录
+                startIntent(true);
+
+            }
 
         }
 
@@ -112,8 +122,11 @@ public class LoginActivity extends Activity {
         if (isGotoLogin){
 
             login(sharedPreferencesUtils.getUsername(),sharedPreferencesUtils.getPassword(),sharedPreferencesUtils.getIp(),sharedPreferencesUtils.getProjectID());
+
             Intent intent = new Intent(LoginActivity.this,FunctionSelectActivity.class);
+
             startActivity(intent);
+
             Toast.makeText(this, "登录成功！", Toast.LENGTH_SHORT).show();
         }
 
@@ -177,9 +190,12 @@ public class LoginActivity extends Activity {
                             } else {
                                 sharedPreferencesUtils.setIsSaveMsg(false);
                             }
-                            Toast.makeText(LoginActivity.this, "登录成功",
-                                    Toast.LENGTH_SHORT).show();
-                            startIntent(false);//进项跳转
+
+                            Intent intent = new Intent(LoginActivity.this,FunctionSelectActivity.class);
+                            startActivity(intent);//进项跳转
+                            Toast.makeText(LoginActivity.this, "登录成功",Toast.LENGTH_SHORT).show();
+                            finish();
+
                         }
 
                         @Override

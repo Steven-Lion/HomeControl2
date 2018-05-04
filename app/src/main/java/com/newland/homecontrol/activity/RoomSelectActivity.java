@@ -127,6 +127,7 @@ public class RoomSelectActivity extends Activity implements MyReceiver.Message {
     public void getMsg(String str) {
         //TODO:当接收到首页check消息时，获取各个房间灯光状态 设置适配器 进行界面展示图片改变
 
+
     }
 
     /**
