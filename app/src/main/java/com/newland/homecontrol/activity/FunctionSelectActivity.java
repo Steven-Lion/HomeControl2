@@ -6,12 +6,14 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.newland.homecontrol.bean.Global;
+import com.newland.homecontrol.bean.GridViewEntity;
 import com.newland.homecontrol.broadcast.MyReceiver;
 import com.newland.homecontrol.R;
 import com.newland.homecontrol.utils.SharedPreferencesUtils;
@@ -22,7 +24,7 @@ import com.nlecloud.nlecloudlibrary.core.ActionCallbackListener;
 import com.nlecloud.nlecloudlibrary.core.AppAction;
 import com.nlecloud.nlecloudlibrary.core.AppActionImpl;
 import com.nlecloud.nlecloudlibrary.domain.AccessToken;
-
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -32,7 +34,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class FunctionSelectActivity extends Activity implements MyReceiver.Message {
 
-
+    private List list;
+    private boolean check[] ;
     private ImageView ivBack;
     private TextView tvTitle;
     private ImageView ivRight;
@@ -121,7 +124,43 @@ public class FunctionSelectActivity extends Activity implements MyReceiver.Messa
     //获取各房间灯的初始状态
     private void getLightState(){
   // TODO: 2017/10/19
+        if(!sharedPreferencesUtils.getIsSimulation()){
+            //获取各房间开关状态.
+            getDataHttp(Global.LIGHT_LIVING,"客厅");
+            getDataHttp(Global.LIGHT_ROOM,"卧室");
+            getDataHttp(Global.LIGHT_STUDY,"书房");
+            //发送广播
+            initSharePreferences();//初始化sharePreferences
+            //是否是自动控制
+            ISAutomatic = sharedPreferencesUtils.getISAutomatic();
+            //执行器线程轮询
+            initTask();
+        }
 
+    }
+    private void initList(){
+        //TODO:更新List数组
+        //清除list 重新添加值
+        list.clear();
+        check[0] = sharedPreferencesUtils.getLivingroom();
+        check[1] = sharedPreferencesUtils.getBedroom();
+        check[2] = sharedPreferencesUtils.getStudy();
+        for (int i = 0;i<imgclass.length;i++){
+            GridViewEntity data = new GridViewEntity();
+            //设置中间的圆形图标
+            data.setImgClass(imgclass[i]);
+            //设置关灯背景图.
+            data.setImgoff(imgoff[i]);
+            //设置开灯背景图
+            data.setImgoff(imgoff[i]);
+            data.setImgon(imgon[i]);
+            //设置灯的实际情况状态，true为要开灯，false
+            data.setOffOn(check[i]);
+            //add object
+            list.add(data);
+        }
+        //刷新适配器.
+        mAdapter.notifyDataSetChanged();
     }
 
     private void login(String UserName, String PWD, String IP, String ProjectId) {
@@ -163,6 +202,58 @@ public class FunctionSelectActivity extends Activity implements MyReceiver.Messa
      */
     private void getDataHttp(int status, final String sort) {
        //// TODO: 获取房间灯的初始状态
+        mAppAction.getActuatorStateByActuatorId(status, new ActionCallbackListener<ApiResponse<Integer>>() {
+            @Override
+            public void onSuccess(ApiResponse<Integer> integerApiResponse) {
+                if (apiResponse.getMessage().equals("获取执行器状态成功"));
+                //0 is close 1 is open
+                switch (sort){
+                    case "客厅" :
+                        if (apiResponse.getAppendData() == 0){
+                            sharedPreferencesUtils.setLivingroom(false);
+                        }
+                        else{
+                            sharedPreferencesUtils.setLivingroom(true);
+                        }
+                        break;
+                    case "卧室" :
+                        if (apiResponse.getAppendData() == 0){
+                            //RGB有开关状态，和一个灯带状态，卧室是关闭状态的时候设置其亮度是0
+                            sharedPreferencesUtils.setBedroom(false);
+                            sharedPreferencesUtils.setStatus(0);
+
+                        }
+                        else{
+                            sharedPreferencesUtils.setBedroom(true);
+                            //当是开启状态时，我们获取其状态值，分别是设置灯带的3个档位的亮度
+                            int light = apiResponse.getAppendData();
+                            if (0 <  light && light<= 110){
+                                    sharedPreferencesUtils.setStatus(1);
+                            }else if(light>110&&light<=160){
+                                sharedPreferencesUtils.setStatus(2);
+                            }else if (light>160){
+                                sharedPreferencesUtils.setStatus(3);
+                            }
+                        }
+                        break;
+                    case "书房" :
+                        if (apiResponse.getAppendData() == 0){
+                            sharedPreferencesUtils.setStudy(false);
+                        }
+                        else{
+                            sharedPreferencesUtils.setStudy(true);
+                        }
+                        break;
+                }
+            }
+
+            @Override
+            public void onFailure(String s, String s1) {
+                //if failure a = 1;
+                int a = 1;
+
+            }
+        });
 
     }
 
@@ -353,8 +444,10 @@ public class FunctionSelectActivity extends Activity implements MyReceiver.Messa
     private void receiver() {
         //注册广播接收器
         myReceiver = new MyReceiver();//自定义广播接收器
+        //实例化广播接收器
         IntentFilter intentFilter = new IntentFilter();//意图过滤
         intentFilter.addAction("com.nangch.broadcasereceiver.MYRECEIVER");
+        //注册广播接收器.
         registerReceiver(myReceiver, intentFilter);
         myReceiver.setMessage(this);
     }
@@ -362,8 +455,11 @@ public class FunctionSelectActivity extends Activity implements MyReceiver.Messa
     @Override
     public void getMsg(String str) {
         //收到时间设置界面发来的广播update时 执行更新数据和标识。（收到广播证明 操作者有进行更改时间设置 需马上获取用户新改时间去进行判断开关灯）
-        if (str.equals("update")) {
-            initSharePreferences();
+        if (str.equals("check")) {
+            //更新适配器list
+            initList();
+            //设置适配器
+            gridView.setAdapter(mAdapter);
         }
         //收到灯光控制界面发来的广播Automatic 自动时。 替换存取为自动模式 并进开光标识的重置 可进行再次进入轮询去执行设置时间开关灯（刷新各个房间标识为初始状态 才能进行继续控制）
         if (str.equals("Automatic")) {
@@ -384,6 +480,10 @@ public class FunctionSelectActivity extends Activity implements MyReceiver.Messa
      */
     private void setMess() {
         // TODO: 2017/10/19
+        //发送广播。通知灯光控制界面,改变灯光展示界面
+        Intent intent = new Intent("com.nangh.bracasereceiver.MYRECEIVER");
+        intent.putExtra("check","check");
+        sendBroadcast(intent);//发送广播
 
     }
 

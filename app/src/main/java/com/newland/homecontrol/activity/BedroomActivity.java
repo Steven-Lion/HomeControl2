@@ -118,6 +118,30 @@ public class BedroomActivity extends Activity {
      */
     private void operateRGB(final int status) {
         // TODO: 根据传过来的值调整RGB灯带颜色
+        switch (status){
+
+            case 0:
+                statusID = 0;break;
+            case 1:
+                statusID = 110;break;
+            case 2:
+                statusID = 160;break;
+            case 3:
+                statusID = 254;break;
+        }
+        mAppAction.OperationAtuator(Global.LIGHT_ROOM, statusID, new ActionCallbackListener<ApiResponse<String>>() {
+            @Override
+            public void onSuccess(ApiResponse<String> stringApiResponse) {
+                setImage(status);//图片展示设置
+                seekBar.setProgress(status);//进度条设置
+            }
+
+            @Override
+            public void onFailure(String s, String s1) {
+                Toast.makeText(BedroomActivity.this, s1, Toast.LENGTH_SHORT).show();
+
+            }
+        });
 
     }
 

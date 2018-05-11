@@ -195,7 +195,7 @@ public class SharedPreferencesUtils {
         editor.commit();
     }
 
-    public boolean getLiviingtoom() {
+    public boolean getLivingroom() {
         return sp.getBoolean(LIVINGROOM, false);
     }
 
